@@ -77,12 +77,14 @@ extension PushNotificationManager {
                                  addingMethodIfNecessary: true)
         
         // Monitor push delivery
-        if let UNDelegate = UNUserNotificationCenter.current().delegate {
-            newClass = type(of: UNDelegate)
-        } else {
-            let center = UNUserNotificationCenter.current()
-            pushObserver = center.observe(\.delegate, options: [.old, .new]) { [weak self] (_, _) in
-                self?.observePushDelegateChange()
+        if #available(iOS 10.0, *) {
+            if let UNDelegate = UNUserNotificationCenter.current().delegate {
+                newClass = type(of: UNDelegate)
+            } else {
+                let center = UNUserNotificationCenter.current()
+                pushObserver = center.observe(\.delegate, options: [.old, .new]) { [weak self] (_, _) in
+                    self?.observePushDelegateChange()
+                }
             }
         }
         
