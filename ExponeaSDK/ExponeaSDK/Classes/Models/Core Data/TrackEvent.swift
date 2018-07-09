@@ -9,7 +9,6 @@
 import Foundation
 import CoreData
 
-@objc(TrackEvent)
 public class TrackEvent: NSManagedObject {
     
     @nonobjc public class func fetchRequest() -> NSFetchRequest<TrackEvent> {
