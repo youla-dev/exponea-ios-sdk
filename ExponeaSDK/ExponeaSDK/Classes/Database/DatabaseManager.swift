@@ -13,6 +13,7 @@ import CoreData
 /// Persisted data will be used to interact with the Exponea API.
 public class DatabaseManager {
 
+    @available(iOS 10.0, *)
     internal lazy var persistentContainer: NSPersistentContainer = {
         let bundle = Bundle(for: DatabaseManager.self)
         let container = NSPersistentContainer(name: "DatabaseModel", bundle: bundle)!
@@ -27,12 +28,52 @@ public class DatabaseManager {
         
         return container
     }()
+    
+    // iOS 9 and below
+    lazy var applicationDocumentsDirectory: URL = {
+        let urls = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+        return urls[urls.count-1]
+    }()
+    
+    lazy var managedObjectModel: NSManagedObjectModel = {
+        let bundle = Bundle(for: DatabaseManager.self)
+        let modelURL = bundle.url(forResource: "DatabaseModel", withExtension: "momd")!
+        return NSManagedObjectModel(contentsOf: modelURL)!
+    }()
+    
+    lazy var persistentStoreCoordinator: NSPersistentStoreCoordinator = {
+        // The persistent store coordinator for the application. This implementation creates and returns a coordinator, having added the store for the application to it. This property is optional since there are legitimate error conditions that could cause the creation of the store to fail.
+        // Create the coordinator and store
+        let coordinator = NSPersistentStoreCoordinator(managedObjectModel: self.managedObjectModel)
+        let url = self.applicationDocumentsDirectory.appendingPathComponent("Exponea.sqlite")
+        var failureReason = "There was an error creating or loading the application's saved data."
+        do {
+            try coordinator.addPersistentStore(ofType: NSSQLiteStoreType, configurationName: nil, at: url, options: nil)
+        } catch {
+            Exponea.logger.log(.error, message: "Unresolved error \(error.localizedDescription).")
+        }
+        
+        return coordinator
+    }()
+    
+    lazy var managedObjectContext: NSManagedObjectContext = {
+        // Returns the managed object context for the application (which is already bound to the persistent store coordinator for the application.) This property is optional since there are legitimate error conditions that could cause the creation of the context to fail.
+        let coordinator = self.persistentStoreCoordinator
+        var managedObjectContext = NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
+        managedObjectContext.persistentStoreCoordinator = coordinator
+        return managedObjectContext
+    }()
 
     init() {
         #if DISABLE_PERSISTENCE
         Exponea.logger.log(.warning, message: "Disable persistence flag is active, clearing database contents.")
         
-        let coordinator = persistentContainer.persistentStoreCoordinator
+        let coordinator
+        if #available(iOS 10.0, *) {
+            coordinator = persistentContainer.persistentStoreCoordinator
+        } else {
+            coordinator = persistentStoreCoordinator
+        }
         guard let url = persistentContainer.persistentStoreDescriptions.first?.url else {
             Exponea.logger.log(.error, message: "Can't get url of persistent store, clearing failed.")
             return
@@ -60,7 +101,11 @@ public class DatabaseManager {
 
     /// Managed Context for Core Data
     var context: NSManagedObjectContext {
-        return persistentContainer.viewContext
+        if #available(iOS 10.0, *) {
+            return persistentContainer.viewContext
+        } else {
+            return managedObjectContext
+        }
     }
 
     /// Save all changes in CoreData
@@ -100,7 +145,14 @@ extension DatabaseManager {
         }
         
         // Create and insert the object
-        let customer = Customer(context: context)
+        let customer:Customer
+        if #available(iOS 10.0, *) {
+            customer = Customer(context: context)
+        } else {
+            let entityDesc = NSEntityDescription.entity(forEntityName: "Customer", in: context)
+            customer = Customer(entity: entityDesc!, insertInto: context)
+        }
+        
         customer.uuid = UUID()
         context.insert(customer)
         
@@ -134,7 +186,13 @@ extension DatabaseManager {
                     """)
             } else {
                 // Create item and insert it
-                let item = KeyValueItem(context: context)
+                let item: KeyValueItem
+                if #available(iOS 10.0, *) {
+                    item = KeyValueItem(context: context)
+                } else {
+                    let entityDesc = NSEntityDescription.entity(forEntityName: "KeyValueItem", in: context)
+                    item = KeyValueItem(entity: entityDesc!, insertInto: context)
+                }
                 item.key = id.key
                 item.value = id.value.objectValue
                 context.insert(item)
@@ -168,7 +226,13 @@ extension DatabaseManager: DatabaseManagerType {
     ///     - `timestamp`
     ///     - `eventType`
     public func trackEvent(with data: [DataType]) throws {
-        let trackEvent = TrackEvent(context: context)
+        let trackEvent: TrackEvent
+        if #available(iOS 10.0, *) {
+            trackEvent = TrackEvent(context: context)
+        } else {
+            let entityDesc = NSEntityDescription.entity(forEntityName: "TrackEvent", in: context)
+            trackEvent = TrackEvent(entity: entityDesc!, insertInto: context)
+        }
         trackEvent.customer = customer
         
         // Always specify a timestamp
@@ -187,8 +251,19 @@ extension DatabaseManager: DatabaseManagerType {
 
             case .properties(let properties):
                 // Add the event properties to the events entity
-                processProperties(properties, into: trackEvent)
-                
+                for property in properties {
+                    let item: KeyValueItem
+                    if #available(iOS 10.0, *) {
+                        item = KeyValueItem(context: context)
+                    } else {
+                        let entityDesc = NSEntityDescription.entity(forEntityName: "KeyValueItem", in: context)
+                        item = KeyValueItem(entity: entityDesc!, insertInto: context)
+                    }
+                    item.key = property.key
+                    item.value = property.value.objectValue
+                    context.insert(item)
+                    trackEvent.addToProperties(item)
+                }
             default:
                 break
             }
@@ -211,8 +286,14 @@ extension DatabaseManager: DatabaseManagerType {
     ///     - `properties`
     ///     - `timestamp`
     /// - Throws: <#throws value description#>
-    public func identifyCustomer(with data: [DataType]) throws {
-        let trackCustomer = TrackCustomer(context: context)
+    public func trackCustomer(with data: [DataType]) throws {
+        let trackCustomer: TrackCustomer
+        if #available(iOS 10.0, *) {
+            trackCustomer = TrackCustomer(context: context)
+        } else {
+            let entityDesc = NSEntityDescription.entity(forEntityName: "TrackCustomer", in: context)
+            trackCustomer = TrackCustomer(entity: entityDesc!, insertInto: context)
+        }
         trackCustomer.customer = customer
         
         // Always specify a timestamp
@@ -231,10 +312,26 @@ extension DatabaseManager: DatabaseManagerType {
 
             case .properties(let properties):
                 // Add the customer properties to the customer entity
-                processProperties(properties, into: trackCustomer)
-                
+                for property in properties {
+                    let item: KeyValueItem
+                    if #available(iOS 10.0, *) {
+                        item = KeyValueItem(context: context)
+                    } else {
+                        let entityDesc = NSEntityDescription.entity(forEntityName: "KeyValueItem", in: context)
+                        item = KeyValueItem(entity: entityDesc!, insertInto: context)
+                    }
+                    item.key = property.key
+                    item.value = property.value.objectValue
+                    trackCustomer.addToProperties(item)
+                }
             case .pushNotificationToken(let token):
-                let item = KeyValueItem(context: context)
+                let item: KeyValueItem
+                if #available(iOS 10.0, *) {
+                    item = KeyValueItem(context: context)
+                } else {
+                    let entityDesc = NSEntityDescription.entity(forEntityName: "KeyValueItem", in: context)
+                    item = KeyValueItem(entity: entityDesc!, insertInto: context)
+                }
                 item.key = "apple_push_notification_id"
                 item.value = token as NSString
                 trackCustomer.addToProperties(item)
