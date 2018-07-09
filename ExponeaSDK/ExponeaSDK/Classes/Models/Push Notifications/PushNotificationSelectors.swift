@@ -35,6 +35,7 @@ internal enum PushSelectorMapping {
             UIResponder.applicationSwizzle(_:didRegisterPushToken:)
         )
         
+        @available(iOS 10.0, *)
         static let newReceive = #selector(
             NSObject.userNotificationCenter(_:newDidReceive:withCompletionHandler:)
         )
@@ -51,6 +52,7 @@ internal enum PushSelectorMapping {
     internal enum Signatures {
         static let registration = (@convention(c) (
             AnyObject, Selector, UIApplication, Data) -> Void).self
+        @available(iOS 10.0, *)
         static let newReceive = (@convention(c) (
             AnyObject, Selector, UNUserNotificationCenter, UNNotificationResponse, () -> Void) -> Void).self
         static let handlerReceive = (@convention(c)
@@ -60,6 +62,7 @@ internal enum PushSelectorMapping {
     }
     
     internal static let registration: Mapping = (Original.registration, Swizzled.registration)
+    @available(iOS 10.0, *)
     internal static let newReceive: Mapping = (Original.newReceive, Swizzled.newReceive)
     internal static let handlerReceive: Mapping = (Original.handlerReceive, Swizzled.handlerReceive)
     internal static let deprecatedReceive: Mapping = (Original.deprecatedReceive, Swizzled.deprecatedReceive)

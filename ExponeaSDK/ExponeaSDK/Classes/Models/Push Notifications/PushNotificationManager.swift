@@ -86,17 +86,20 @@ extension PushNotificationManager {
                     self?.observePushDelegateChange()
                 }
             }
+            if let newClass = newClass, class_getInstanceMethod(newClass, PushSelectorMapping.newReceive.original) != nil {
+                // Check for UNUserNotification's delegate did receive remote notification
+                swizzleMapping = PushSelectorMapping.newReceive
+            }
         }
         
-        if let newClass = newClass, class_getInstanceMethod(newClass, PushSelectorMapping.newReceive.original) != nil {
-            // Check for UNUserNotification's delegate did receive remote notification
-            swizzleMapping = PushSelectorMapping.newReceive
-        } else if class_getInstanceMethod(appDelegateClass, PushSelectorMapping.handlerReceive.original) != nil {
-            // Check for UIAppDelegate's did receive remote notification with fetch completion handler
-            swizzleMapping = PushSelectorMapping.handlerReceive
-        } else if class_getInstanceMethod(appDelegateClass, PushSelectorMapping.deprecatedReceive.original) != nil {
-            // Check for UIAppDelegate's deprecated receive remote notification
-            swizzleMapping = PushSelectorMapping.deprecatedReceive
+        if swizzleMapping == nil {
+            if class_getInstanceMethod(appDelegateClass, PushSelectorMapping.handlerReceive.original) != nil {
+                // Check for UIAppDelegate's did receive remote notification with fetch completion handler
+                swizzleMapping = PushSelectorMapping.handlerReceive
+            } else if class_getInstanceMethod(appDelegateClass, PushSelectorMapping.deprecatedReceive.original) != nil {
+                // Check for UIAppDelegate's deprecated receive remote notification
+                swizzleMapping = PushSelectorMapping.deprecatedReceive
+            }
         }
         
         guard let mapping = swizzleMapping else {
@@ -124,6 +127,7 @@ extension PushNotificationManager {
         }
     }
     
+    @available(iOS 10.0, *)
     private func observePushDelegateChange() {
         guard let UNDelegate = UNUserNotificationCenter.current().delegate else { return }
         let delegateClass: AnyClass = type(of: UNDelegate)
@@ -206,6 +210,7 @@ extension UIResponder {
 }
 
 extension NSObject {
+    @available(iOS 10.0, *)
     @objc func userNotificationCenter(_ center: UNUserNotificationCenter,
                                       newDidReceive response: UNNotificationResponse,
                                       withCompletionHandler completionHandler: @escaping () -> Void) {
