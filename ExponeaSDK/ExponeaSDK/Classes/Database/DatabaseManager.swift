@@ -145,13 +145,8 @@ extension DatabaseManager {
         }
         
         // Create and insert the object
-        let customer:Customer
-        if #available(iOS 10.0, *) {
-            customer = Customer(context: context)
-        } else {
-            let entityDesc = NSEntityDescription.entity(forEntityName: "Customer", in: context)
-            customer = Customer(entity: entityDesc!, insertInto: context)
-        }
+        let entityDesc = NSEntityDescription.entity(forEntityName: "Customer", in: context)
+        let customer = Customer(entity: entityDesc!, insertInto: context)
         
         customer.uuid = UUID()
         context.insert(customer)
@@ -186,13 +181,8 @@ extension DatabaseManager {
                     """)
             } else {
                 // Create item and insert it
-                let item: KeyValueItem
-                if #available(iOS 10.0, *) {
-                    item = KeyValueItem(context: context)
-                } else {
-                    let entityDesc = NSEntityDescription.entity(forEntityName: "KeyValueItem", in: context)
-                    item = KeyValueItem(entity: entityDesc!, insertInto: context)
-                }
+                let entityDesc = NSEntityDescription.entity(forEntityName: "KeyValueItem", in: context)
+                let item = KeyValueItem(entity: entityDesc!, insertInto: context)
                 item.key = id.key
                 item.value = id.value.objectValue
                 context.insert(item)
@@ -226,13 +216,8 @@ extension DatabaseManager: DatabaseManagerType {
     ///     - `timestamp`
     ///     - `eventType`
     public func trackEvent(with data: [DataType]) throws {
-        let trackEvent: TrackEvent
-        if #available(iOS 10.0, *) {
-            trackEvent = TrackEvent(context: context)
-        } else {
-            let entityDesc = NSEntityDescription.entity(forEntityName: "TrackEvent", in: context)
-            trackEvent = TrackEvent(entity: entityDesc!, insertInto: context)
-        }
+        let entityDesc = NSEntityDescription.entity(forEntityName: "TrackEvent", in: context)
+        let trackEvent = TrackEvent(entity: entityDesc!, insertInto: context)
         trackEvent.customer = customer
         
         // Always specify a timestamp
@@ -252,13 +237,8 @@ extension DatabaseManager: DatabaseManagerType {
             case .properties(let properties):
                 // Add the event properties to the events entity
                 for property in properties {
-                    let item: KeyValueItem
-                    if #available(iOS 10.0, *) {
-                        item = KeyValueItem(context: context)
-                    } else {
-                        let entityDesc = NSEntityDescription.entity(forEntityName: "KeyValueItem", in: context)
-                        item = KeyValueItem(entity: entityDesc!, insertInto: context)
-                    }
+                    let entityDesc = NSEntityDescription.entity(forEntityName: "KeyValueItem", in: context)
+                    let item = KeyValueItem(entity: entityDesc!, insertInto: context)
                     item.key = property.key
                     item.value = property.value.objectValue
                     context.insert(item)
@@ -287,13 +267,8 @@ extension DatabaseManager: DatabaseManagerType {
     ///     - `timestamp`
     /// - Throws: <#throws value description#>
     public func trackCustomer(with data: [DataType]) throws {
-        let trackCustomer: TrackCustomer
-        if #available(iOS 10.0, *) {
-            trackCustomer = TrackCustomer(context: context)
-        } else {
-            let entityDesc = NSEntityDescription.entity(forEntityName: "TrackCustomer", in: context)
-            trackCustomer = TrackCustomer(entity: entityDesc!, insertInto: context)
-        }
+        let entityDesc = NSEntityDescription.entity(forEntityName: "TrackCustomer", in: context)
+        let trackCustomer = TrackCustomer(entity: entityDesc!, insertInto: context)
         trackCustomer.customer = customer
         
         // Always specify a timestamp
@@ -313,25 +288,15 @@ extension DatabaseManager: DatabaseManagerType {
             case .properties(let properties):
                 // Add the customer properties to the customer entity
                 for property in properties {
-                    let item: KeyValueItem
-                    if #available(iOS 10.0, *) {
-                        item = KeyValueItem(context: context)
-                    } else {
-                        let entityDesc = NSEntityDescription.entity(forEntityName: "KeyValueItem", in: context)
-                        item = KeyValueItem(entity: entityDesc!, insertInto: context)
-                    }
+                    let entityDesc = NSEntityDescription.entity(forEntityName: "KeyValueItem", in: context)
+                    let item = KeyValueItem(entity: entityDesc!, insertInto: context)
                     item.key = property.key
                     item.value = property.value.objectValue
                     trackCustomer.addToProperties(item)
                 }
             case .pushNotificationToken(let token):
-                let item: KeyValueItem
-                if #available(iOS 10.0, *) {
-                    item = KeyValueItem(context: context)
-                } else {
-                    let entityDesc = NSEntityDescription.entity(forEntityName: "KeyValueItem", in: context)
-                    item = KeyValueItem(entity: entityDesc!, insertInto: context)
-                }
+                let entityDesc = NSEntityDescription.entity(forEntityName: "KeyValueItem", in: context)
+                let item = KeyValueItem(entity: entityDesc!, insertInto: context)
                 item.key = "apple_push_notification_id"
                 item.value = token as NSString
                 trackCustomer.addToProperties(item)
