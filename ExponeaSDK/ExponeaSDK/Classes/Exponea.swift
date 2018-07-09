@@ -8,7 +8,8 @@
 
 import Foundation
 
-public class Exponea: ExponeaType {
+@objc
+public class Exponea: NSObject, ExponeaType {
     /// Shared instance of ExponeaSDK.
     @objc
     public internal(set) static var shared = Exponea()
@@ -92,7 +93,7 @@ public class Exponea: ExponeaType {
     // MARK: - Init -
     
     /// The initialiser is internal, so that only the singleton can exist when used in production.
-    internal init() {
+    internal override init() {
         let version = Bundle(for: Exponea.self).infoDictionary?["CFBundleShortVersionString"] as? String ?? ""
         Exponea.logger.logMessage("⚙️ Starting ExponeaSDK, version \(version).")
     }
