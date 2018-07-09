@@ -10,6 +10,7 @@ import Foundation
 
 public class Exponea: ExponeaType {
     /// Shared instance of ExponeaSDK.
+    @objc
     public internal(set) static var shared = Exponea()
     
     /// A logger used to log all messages from the SDK.
@@ -145,6 +146,23 @@ internal extension Exponea {
 public extension Exponea {
     
     // MARK: - Configure -
+    
+    /// Initialize the configuration without a projectMapping (token mapping) for each type of event.
+    ///
+    /// - Parameters:
+    ///   - projectToken: Project token to be used through the SDK.
+    ///   - baseURL: Base URL used for the project, for example if you use a custom domain with your Exponea setup.
+    @objc
+    public func configure(projectToken: String, baseURL: String? = nil) {
+        do {
+            let configuration = try Configuration(projectToken: projectToken,
+                                                  authorization: Authorization.none,
+                                                  baseURL: baseURL)
+            self.configuration = configuration
+        } catch {
+            Exponea.logger.log(.error, message: "Can't create configuration: \(error.localizedDescription)")
+        }
+    }
     
     /// Initialize the configuration without a projectMapping (token mapping) for each type of event.
     ///
