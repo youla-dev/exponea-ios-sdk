@@ -15,7 +15,9 @@ public class DatabaseManager {
 
     @available(iOS 10.0, *)
     internal lazy var persistentContainer: NSPersistentContainer = {
-        let bundle = Bundle(for: DatabaseManager.self)
+        let bundle: Bundle = Bundle(for: DatabaseManager.self)
+            .path(forResource: "ExponeaSDK", ofType: "bundle")
+            .flatMap { Bundle(path: $0) } ?? Bundle(for: DatabaseManager.self)
         let container = NSPersistentContainer(name: "DatabaseModel", bundle: bundle)!
         
         container.loadPersistentStores(completionHandler: { (_, error) in
@@ -36,7 +38,9 @@ public class DatabaseManager {
     }()
     
     lazy var managedObjectModel: NSManagedObjectModel = {
-        let bundle = Bundle(for: DatabaseManager.self)
+        let bundle: Bundle = Bundle(for: DatabaseManager.self)
+            .path(forResource: "ExponeaSDK", ofType: "bundle")
+            .flatMap { Bundle(path: $0) } ?? Bundle(for: DatabaseManager.self)
         let modelURL = bundle.url(forResource: "DatabaseModel", withExtension: "momd")!
         return NSManagedObjectModel(contentsOf: modelURL)!
     }()

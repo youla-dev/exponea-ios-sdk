@@ -88,7 +88,7 @@ Pod::Spec.new do |s|
   #  non-essential files like tests, examples and documentation.
   #
   
-#s.resources = ['ExponeaSDK/ExponeaSDK/Classes/Database/*.xcdatamodeld']
+  s.resources = ['ExponeaSDK/ExponeaSDK/Classes/Database/*.xcdatamodeld']
   s.resource_bundles = { 'ExponeaSDK' => ['ExponeaSDK/ExponeaSDK/Classes/Database/*.xcdatamodeld']}
 
 end
