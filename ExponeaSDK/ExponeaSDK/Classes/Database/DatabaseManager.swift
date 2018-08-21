@@ -210,8 +210,53 @@ extension DatabaseManager {
 }
 
 extension DatabaseManager: DatabaseManagerType {
+
+
+    /// Add customer properties into the database.
+    ///
+    /// - Parameter data: See `DataType` for more information. Types specified below are required at minimum.
+    ///     - `projectToken`
+    ///     - `customerId`
+    ///     - `properties`
+    ///     - `timestamp`
+    /// - Throws: <#throws value description#>
     public func identifyCustomer(with data: [DataType]) throws {
-        <#code#>
+        let entityDesc = NSEntityDescription.entity(forEntityName: "TrackCustomer", in: context)
+        let trackCustomer = TrackCustomer(entity: entityDesc!, insertInto: context)
+        trackCustomer.customer = customer
+
+        // Always specify a timestamp
+        trackCustomer.timestamp = Date().timeIntervalSince1970
+
+        for type in data {
+            switch type {
+            case .projectToken(let token):
+                trackCustomer.projectToken = token
+
+            case .customerIds(let ids):
+                trackCustomer.customer = fetchCustomerAndUpdate(with: ids)
+
+            case .timestamp(let time):
+                trackCustomer.timestamp = time ?? trackCustomer.timestamp
+
+            case .properties(let properties):
+                // Add the customer properties to the customer entity
+                processProperties(properties, into: trackCustomer)
+
+            case .pushNotificationToken(let token):
+                let entityDesc = NSEntityDescription.entity(forEntityName: "KeyValueItem", in: context)
+                let item = KeyValueItem(entity: entityDesc!, insertInto: context)
+                item.key = "apple_push_notification_id"
+                item.value = token as NSString
+                trackCustomer.addToProperties(item)
+
+            default:
+                break
+            }
+        }
+
+        // Save the customer properties into CoreData
+        try saveContext()
     }
 
     /// Add any type of event into coredata.
