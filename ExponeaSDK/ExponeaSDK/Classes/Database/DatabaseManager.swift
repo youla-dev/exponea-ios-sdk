@@ -210,6 +210,9 @@ extension DatabaseManager {
 }
 
 extension DatabaseManager: DatabaseManagerType {
+    public func identifyCustomer(with data: [DataType]) throws {
+        <#code#>
+    }
 
     /// Add any type of event into coredata.
     ///
@@ -322,7 +325,8 @@ extension DatabaseManager: DatabaseManagerType {
     internal func processProperties(_ properties: [String: JSONValue],
                                     into object: HasKeyValueProperties) {
         for property in properties {
-            let item = KeyValueItem(context: context)
+            let entityDesc = NSEntityDescription.entity(forEntityName: "KeyValueItem", in: context)
+            let item = KeyValueItem(entity: entityDesc!, insertInto: context)
             item.key = property.key
             item.value = property.value.objectValue
             context.insert(item)

@@ -158,7 +158,7 @@ public extension Exponea {
         do {
             let configuration = try Configuration(projectToken: projectToken,
                                                   authorization: Authorization.none,
-                                                  baseURL: baseURL)
+                                                  baseUrl: baseURL)
             self.configuration = configuration
         } catch {
             Exponea.logger.log(.error, message: "Can't create configuration: \(error.localizedDescription)")
