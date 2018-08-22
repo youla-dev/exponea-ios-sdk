@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="14135" systemVersion="18A326h" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
-    <entity name="Customer" representedClassName="Customer" syncable="YES">
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="14135" systemVersion="17G65" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="Customer" representedClassName=".Customer" syncable="YES">
         <attribute name="uuid" attributeType="Transformable" customClassName="UUID" syncable="YES"/>
         <relationship name="customIds" toMany="YES" deletionRule="Nullify" destinationEntity="KeyValueItem" inverseName="customer" inverseEntity="KeyValueItem" syncable="YES"/>
         <relationship name="trackCustomer" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="TrackCustomer" inverseName="customer" inverseEntity="TrackCustomer" syncable="YES"/>
