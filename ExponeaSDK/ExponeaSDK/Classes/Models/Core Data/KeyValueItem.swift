@@ -16,7 +16,6 @@ public protocol HasKeyValueProperties: class {
     func removeFromProperties(_ values: NSSet)
 }
 
-@objc(KeyValueItem)
 public class KeyValueItem: NSManagedObject {
     
     @nonobjc public class func fetchRequest() -> NSFetchRequest<KeyValueItem> {
