@@ -9,7 +9,7 @@
 import Foundation
 
 /// Basic information about the device
-struct DeviceProperties {
+public struct DeviceProperties {
     internal let bundle: Bundle
     
     /// Operational system name
