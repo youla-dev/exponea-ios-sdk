@@ -137,6 +137,36 @@ extension Exponea {
         }
     }
     
+    /// Tracks the push notification delivered event to Exponea API.
+    public func trackPushDelivered(with userInfo: [AnyHashable: Any]) {
+        executeWithDependencies { dependencies in
+            guard dependencies.configuration.authorization != Authorization.none else {
+                throw ExponeaError.authorizationInsufficient("token, basic")
+            }
+            
+            guard let payload = userInfo as? [String: Any] else {
+                Exponea.logger.log(.error, message: "Push notification payload contained non-string keys.")
+                return
+            }
+            
+            // Retrieve the default properties to add on track events and combine with the received ones.
+            let defaultProperties = dependencies.configuration.defaultProperties?.mapValues { $0.jsonValue } ?? [:]
+            
+            var properties = JSONValue.convert(payload)
+            if properties.index(forKey: "action_type") == nil {
+                properties["action_type"] = .string("mobile notification")
+            }
+            properties["status"] = .string("delivered")
+            
+            let allProperties = defaultProperties.merging(properties, uniquingKeysWith: { (_, new) in new })
+            
+            let data: [DataType] = [.timestamp(nil),
+                                    .properties(allProperties)]
+            // Do the actual tracking
+            try dependencies.trackingManager.track(.pushDelivered, with: data)
+        }
+    }
+    
     /// Tracks the push notification clicked event to Exponea API.
     public func trackPushOpened(with userInfo: [AnyHashable: Any]) {
         executeWithDependencies { dependencies in
