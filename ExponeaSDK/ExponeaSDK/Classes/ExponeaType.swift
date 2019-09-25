@@ -59,6 +59,12 @@ public protocol ExponeaType: class {
     ///  - authorization: The authorization type used to authenticate with some Exponea endpoints.
     func configure(plistName: String)
     
+    /// Initialize with given configuration
+    ///
+    /// - Parameters:
+    ///   - configuration: Configuration model
+    func configure(configuration: Configuration)
+    
     // MARK: - Tracking -
     
     /// Adds new events to a customer. All events will be stored into coredata

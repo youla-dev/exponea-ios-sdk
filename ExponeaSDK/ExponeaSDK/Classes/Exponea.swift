@@ -236,4 +236,12 @@ public extension Exponea {
             Exponea.logger.log(.error, message: "Can't create configuration: \(error.localizedDescription)")
         }
     }
+    
+    /// Initialize with given configuration
+    ///
+    /// - Parameters:
+    ///   - configuration: Configuration model
+    func configure(configuration: Configuration) {
+        self.configuration = configuration
+    }
 }
