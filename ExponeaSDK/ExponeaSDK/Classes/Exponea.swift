@@ -241,7 +241,7 @@ public extension Exponea {
     ///
     /// - Parameters:
     ///   - configuration: Configuration model
-    func configure(configuration: Configuration) {
+    func configure(with configuration: Configuration) {
         self.configuration = configuration
     }
 }

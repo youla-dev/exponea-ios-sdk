@@ -63,7 +63,7 @@ public protocol ExponeaType: class {
     ///
     /// - Parameters:
     ///   - configuration: Configuration model
-    func configure(configuration: Configuration)
+    func configure(with configuration: Configuration)
     
     // MARK: - Tracking -
     
